@@ -2,43 +2,56 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { CheckCircle, Wallet, Shield, Globe, Copy, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { SubdomainRegistration } from "@/components/ens/SubdomainRegistration"
+import { EFPVerification } from "@/components/efp/EFPVerification"
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount } from 'wagmi'
+
 
 export default function CitizenOnboarding() {
+  const { address, isConnected } = useAccount()
   const [currentStep, setCurrentStep] = useState(1)
-  const [walletConnected, setWalletConnected] = useState(false)
   const [efpVerified, setEfpVerified] = useState(false)
+  const [efpProfile, setEfpProfile] = useState<any>(null)
   const [ensGenerated, setEnsGenerated] = useState(false)
+  const [registeredSubdomain, setRegisteredSubdomain] = useState<string>('')
+
+  // Update wallet connection state based on wagmi
+  useEffect(() => {
+    if (isConnected && address && currentStep === 1) {
+      setCurrentStep(2)
+    }
+  }, [isConnected, address, currentStep])
 
   const steps = [
-    { id: 1, title: "Connect Wallet", icon: Wallet, completed: walletConnected },
+    { id: 1, title: "Connect Wallet", icon: Wallet, completed: isConnected },
     { id: 2, title: "EFP Verification", icon: Shield, completed: efpVerified },
     { id: 3, title: "ENS Subname", icon: Globe, completed: ensGenerated },
   ]
 
   const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100
 
-  const handleWalletConnect = () => {
-    setWalletConnected(true)
-    setCurrentStep(2)
+  const handleEfpVerification = (verified: boolean, profile: any) => {
+    setEfpVerified(verified)
+    setEfpProfile(profile)
+    if (verified) {
+      setCurrentStep(3)
+    }
   }
 
-  const handleEfpVerify = () => {
-    setEfpVerified(true)
-    setCurrentStep(3)
-  }
-
-  const handleEnsGenerate = () => {
+  const handleSubdomainRegistration = (subdomain: string) => {
+    setRegisteredSubdomain(subdomain)
     setEnsGenerated(true)
   }
 
-  const isOnboardingComplete = walletConnected && efpVerified && ensGenerated
+  const isOnboardingComplete = isConnected && efpVerified && ensGenerated
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] flex flex-col">
@@ -59,10 +72,7 @@ export default function CitizenOnboarding() {
               <span className="font-bold text-xl text-gray-900">CitiProof</span>
             </div>
           </div>
-          <Button variant="outline" size="sm">
-            <Wallet className="w-4 h-4 mr-2" />
-            Connect Wallet
-          </Button>
+          <ConnectButton />
         </div>
       </nav>
 
@@ -117,10 +127,10 @@ export default function CitizenOnboarding() {
                   <div className="flex items-center space-x-3">
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        walletConnected ? "bg-[#27AE60]" : "bg-[#3D7EFF]"
+                        isConnected ? "bg-[#27AE60]" : "bg-[#3D7EFF]"
                       }`}
                     >
-                      {walletConnected ? (
+                      {isConnected ? (
                         <CheckCircle className="w-5 h-5 text-white" />
                       ) : (
                         <Wallet className="w-5 h-5 text-white" />
@@ -131,20 +141,29 @@ export default function CitizenOnboarding() {
                       <CardDescription>Link your Ethereum wallet to get started</CardDescription>
                     </div>
                   </div>
-                  {walletConnected && (
+                  {isConnected && (
                     <Badge className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90">Connected</Badge>
                   )}
                 </div>
               </CardHeader>
-              {!walletConnected && (
+              {!isConnected && (
                 <CardContent>
-                  <Button
-                    onClick={handleWalletConnect}
-                    className="w-full bg-[#3D7EFF] hover:bg-[#3D7EFF]/90 text-white rounded-xl"
-                  >
-                    <Wallet className="w-4 h-4 mr-2" />
-                    Connect Wallet
-                  </Button>
+                  <div className="flex justify-center">
+                    <ConnectButton />
+                  </div>
+                </CardContent>
+              )}
+              {isConnected && address && (
+                <CardContent>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase font-medium mb-1">Connected Wallet</p>
+                        <p className="font-mono text-sm text-gray-900">{address.slice(0, 6)}...{address.slice(-4)}</p>
+                      </div>
+                      <Badge className="bg-[#27AE60] text-white">Connected</Badge>
+                    </div>
+                  </div>
                 </CardContent>
               )}
             </Card>
@@ -183,24 +202,30 @@ export default function CitizenOnboarding() {
               </CardHeader>
               {currentStep >= 2 && !efpVerified && (
                 <CardContent>
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
-                      Complete EFP verification to prove your identity and build trust in the CitiProof network.
-                    </p>
-                    <Button
-                      onClick={handleEfpVerify}
-                      className="w-full bg-[#3D7EFF] hover:bg-[#3D7EFF]/90 text-white rounded-xl"
-                      disabled={!walletConnected}
-                    >
-                      <Shield className="w-4 h-4 mr-2" />
-                      Start EFP Verification
-                    </Button>
+                  <EFPVerification
+                    walletAddress={address}
+                    onVerificationComplete={handleEfpVerification}
+                  />
+                </CardContent>
+              )}
+              {efpVerified && efpProfile && (
+                <CardContent>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase font-medium mb-1">EFP Profile</p>
+                        <p className="text-sm text-gray-900">
+                          {efpProfile.followerCount} followers • {efpProfile.followingCount} following
+                        </p>
+                      </div>
+                      <Badge className="bg-[#27AE60] text-white">Verified</Badge>
+                    </div>
                   </div>
                 </CardContent>
               )}
             </Card>
 
-            {/* Step 3: ENS Subname Generator */}
+            {/* Step 3: ENS Subname Registration */}
             <Card className="rounded-2xl shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -221,33 +246,29 @@ export default function CitizenOnboarding() {
                       <CardDescription>Get your unique CitiProof identity</CardDescription>
                     </div>
                   </div>
-                  {ensGenerated && <Badge className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90">Generated</Badge>}
+                  {ensGenerated && <Badge className="bg-[#27AE60] text-white hover:bg-[#27AE60]/90">Registered</Badge>}
                 </div>
               </CardHeader>
-              {currentStep >= 3 && (
+              {currentStep >= 3 && !ensGenerated && (
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-500 uppercase font-medium mb-1">Your ENS Subname</p>
-                          <p className="font-mono text-lg text-gray-900">ama.citiproof.eth</p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Copy className="w-4 h-4" />
-                        </Button>
+                  <SubdomainRegistration
+                    walletAddress={address}
+                    onRegistrationComplete={handleSubdomainRegistration}
+                  />
+                </CardContent>
+              )}
+              {ensGenerated && registeredSubdomain && (
+                <CardContent>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase font-medium mb-1">Your CitiProof Identity</p>
+                        <p className="font-mono text-lg text-gray-900">{registeredSubdomain}.citiproof.eth</p>
                       </div>
-                    </div>
-                    {!ensGenerated && (
-                      <Button
-                        onClick={handleEnsGenerate}
-                        className="w-full bg-[#3D7EFF] hover:bg-[#3D7EFF]/90 text-white rounded-xl"
-                        disabled={!efpVerified}
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        Generate ENS Subname
+                      <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(`${registeredSubdomain}.citiproof.eth`)}>
+                        <Copy className="w-4 h-4" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               )}

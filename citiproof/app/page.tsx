@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Eye, CheckCircle, ArrowRight, Wallet, Star, Building, Heart, Award } from "lucide-react"
+import { Shield, Eye, CheckCircle, ArrowRight, Wallet, Building, Heart } from "lucide-react"
 import Link from "next/link"
+import { CitizenLeaderboard } from "@/components/ens/CitizenLeaderboard"
 
 export default function LandingPage() {
   return (
@@ -277,53 +278,7 @@ export default function LandingPage() {
             <h2 className="font-bold text-3xl text-blue-900 mb-4">Community & Recognition</h2>
             <p className="text-lg text-blue-600">Top citizen auditors building trust in governance</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card className="text-center border border-blue-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-blue-900">alex.citiproof.eth</CardTitle>
-                <CardDescription>
-                  <div className="flex items-center justify-center space-x-2 mt-2">
-                    <Star className="w-4 h-4 text-blue-500 fill-current" />
-                    <span className="font-semibold text-blue-900">4.9</span>
-                    <span className="text-sm text-blue-600">• 127 reports</span>
-                  </div>
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="text-center border border-blue-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up animation-delay-200">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-blue-900">sarah.citiproof.eth</CardTitle>
-                <CardDescription>
-                  <div className="flex items-center justify-center space-x-2 mt-2">
-                    <Star className="w-4 h-4 text-blue-500 fill-current" />
-                    <span className="font-semibold text-blue-900">4.8</span>
-                    <span className="text-sm text-blue-600">• 89 reports</span>
-                  </div>
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="text-center border border-blue-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up animation-delay-400">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-blue-900">mike.citiproof.eth</CardTitle>
-                <CardDescription>
-                  <div className="flex items-center justify-center space-x-2 mt-2">
-                    <Star className="w-4 h-4 text-blue-500 fill-current" />
-                    <span className="font-semibold text-blue-900">4.7</span>
-                    <span className="text-sm text-blue-600">• 76 reports</span>
-                  </div>
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
+          <CitizenLeaderboard />
         </div>
       </section>
 

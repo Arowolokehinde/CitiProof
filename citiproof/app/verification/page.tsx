@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Upload, MapPin, Camera, Award, CheckCircle, Clock, X } from "lucide-react"
 import Link from "next/link"
+import { CitizenVerification } from "@/components/ens/CitizenVerification"
 
 export default function CitizenVerificationPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
